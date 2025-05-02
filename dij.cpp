@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>    // std::sort
 
+const int Inf = 1<<30;
+
 
 using std::cout;
 using std::string;
@@ -120,23 +122,76 @@ int main()
 
 void Graph::dijkstra()
 {
-    // Mark all nodes as unvisited.
-    // Mark the initially selected node with the current distance of 0 and the rest with infinity.
-    // ...
+    for (auto& n : m)
+    {
+        Node& node = n.second;
+        node.visited  = false;   // Mark all nodes as unvisited.
+        node.path.clear();
+    
+        // Mark the initially selected node with the current distance of 0 and the rest with infinity.
+        if (node.name == root)
+        {
+            node.distance = 0;
+        }
+
+        else
+        {
+            node.distance = Inf;
+        }
+    }
 
     // Set the initial node as the current node.
-    // ...
+    string current = root;
+    m[root].path = {};
+
 
     // (*) For the current node, consider all of its unvisited neighbors
     // and calculate their distances by adding the current distance of the current node
     // to the weight of the edge that connects the current node to the neighboring node.
-    // ...
+    while (true)
+    {
+        for (const auto& [neighbour_name, weight] : m[current].edges)
+        {
+            Node& neighbour = m[neighbour_name];
+    
+            if (neighbour.visited == false)
+            {
+                int new_dist = m[current].distance + weight;
+    
+                if (new_dist < neighbour.distance)
+                {
+                    neighbour.distance = new_dist;
+                    neighbour.path = m[current].path;
+                    neighbour.path.push_back(current);
+                }
+            }
+        }
+    
+        // When you're done considering all of the unvisited neighbors of the current node,
+        // mark the current node as visited.
+        m[current].visited = true;
 
-    // When you’re done considering all of the unvisited neighbors of the current node,
-    // mark the current node as visited.
-    // ...
+        // Select the unvisited node that is marked with the smallest distance, set it as
+        // the new current node, and go back to step (*)
+        Node* min = nullptr;
+        int min_dist = Inf;
+    
+        for (auto& n : m)
+        {   
+            Node& node = n.second;
 
-    // Select the unvisited node that is marked with the smallest distance, set it as
-    // the new current node, and go back to step (*)
-    // ...
+            if (node.visited == false && node.distance < min_dist)
+            {
+                min_dist = node.distance;
+                min = &node;
+            }
+        }
+
+        if (!min)
+        {
+            break;
+        }
+
+        current = min->name;
+    }    
 }
